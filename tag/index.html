@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Found a pet? · Track-a-Paw</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--forest:#1F5148;--orange:#FF7900;--ivory:#F6F1E7;--ink:#23332F;--muted:#55625D;--line:#E6DFD1;--lost:#B3261E;--found:#2E7D32}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ivory);color:var(--ink);font:17px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;padding-inline:16px}
+  main{max-width:520px;margin:0 auto;padding-block:28px 48px;display:flex;flex-direction:column;gap:18px}
+  .brand{font:700 15px Figtree,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--forest)}
+  h1{font:700 32px/1.1 Fraunces,Georgia,serif;color:var(--forest);margin:0;text-wrap:balance}
+  .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+  .photo{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;background:#F3D9BF}
+  .lost{background:var(--lost);color:#fff;border-radius:14px;padding:12px 14px;font-weight:800}
+  .label{font-size:12.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+  textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:14px;padding:12px;font:inherit;background:#fff}
+  label.check{display:flex;gap:10px;align-items:flex-start;font-size:15.5px}
+  label.check input{width:22px;height:22px;margin-top:2px;accent-color:var(--forest)}
+  button{font:800 17px Figtree,sans-serif;background:var(--orange);color:var(--forest);border:0;border-radius:999px;padding:15px 20px;cursor:pointer}
+  button:disabled{opacity:.6}
+  button:focus-visible,textarea:focus-visible{outline:3px solid var(--forest);outline-offset:2px}
+  .muted{color:var(--muted);font-size:14.5px}
+  .ok{background:#E3F1E4;border:1px solid #BFE0C2;border-radius:14px;padding:14px;color:var(--found);font-weight:700}
+  .err{color:var(--lost);font-weight:700}
+  [hidden]{display:none!important}
+  footer{color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">Track-a-Paw</div>
+
+  <section id="loading"><p class="muted">Looking up this tag…</p></section>
+
+  <section id="missing" hidden>
+    <h1>This tag isn't active</h1>
+    <div class="card"><p>We couldn't find a pet for this tag. Check the code on the tag, or contact
+    a local vet or shelter: they can scan the pet's microchip.</p></div>
+  </section>
+
+  <section id="pet" hidden>
+    <h1 id="title">You found a pet</h1>
+    <div class="card">
+      <div id="lostBanner" class="lost" hidden>This pet is reported LOST. Their family is looking for them.</div>
+      <img id="photo" class="photo" alt="" hidden>
+      <div id="msgWrap" hidden><div class="label">From the owner</div><p id="msg" style="margin:.2rem 0 0"></p></div>
+      <div id="medWrap" hidden><div class="label">Medical note</div><p id="med" style="margin:.2rem 0 0"></p></div>
+    </div>
+
+    <form id="form" class="card">
+      <div class="label">Tell the owner</div>
+      <textarea id="note" maxlength="480" required
+        placeholder="Where you found them, and how the owner can reach you (for example your phone number)."></textarea>
+      <label class="check"><input type="checkbox" id="share" checked>
+        <span>Share the area I'm in (rounded to about 100 m, never an exact spot).</span></label>
+      <button id="send" type="submit">Send to the owner</button>
+      <p class="muted" style="margin:0">Your note goes only to this pet's owner. Please stay with the pet if it's safe, or take it to a vet or shelter.</p>
+      <p id="error" class="err" hidden></p>
+    </form>
+
+    <div id="done" class="ok" hidden>Thank you. The owner has been told. If you left your number, they'll be in touch.</div>
+  </section>
+
+  <footer>Track-a-Paw by Crafted Pixel · THE PET WELLBEING COMPANY PTY LTD</footer>
+</main>
+
+<script>
+(function () {
+  var URL_ = 'https://bxoboypzumjdfkpszbkt.supabase.co';
+  var KEY = 'sb_publishable_g3AquYaNa0cwXs8jxqidqg_p1FwQCWJ';
+  var H = { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' };
+  var q = new URLSearchParams(location.search);
+  var code = (q.get('c') || location.hash.replace('#', '') || '').trim().toUpperCase();
+  var $ = function (id) { return document.getElementById(id); };
+  var species = { dog: 'dog', cat: 'cat', rabbit: 'rabbit', bird: 'bird', other: 'pet' };
+
+  function show(id) { ['loading', 'missing', 'pet'].forEach(function (s) { $(s).hidden = s !== id; }); }
+
+  function rpc(name, body) {
+    return fetch(URL_ + '/rest/v1/rpc/' + name, { method: 'POST', headers: H, body: JSON.stringify(body) })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+
+  if (!/^[A-Z0-9]{6,10}$/.test(code)) { show('missing'); return; }
+
+  rpc('track_tag_lookup', { p_code: code }).then(function (rows) {
+    var p = rows && rows[0];
+    if (!p) { show('missing'); return; }
+    $('title').textContent = p.pet_name
+      ? 'You found ' + p.pet_name
+      : 'You found someone’s ' + (species[p.species] || 'pet');
+    if (p.finder_message) { $('msg').textContent = p.finder_message; $('msgWrap').hidden = false; }
+    if (p.medical_note) { $('med').textContent = p.medical_note; $('medWrap').hidden = false; }
+    if (p.is_lost) {
+      $('lostBanner').hidden = false;
+      if (p.alert_id) {
+        fetch(URL_ + '/rest/v1/track_alerts?select=photo_path&id=eq.' + encodeURIComponent(p.alert_id), { headers: H })
+          .then(function (r) { return r.ok ? r.json() : []; })
+          .then(function (a) {
+            var path = a && a[0] && a[0].photo_path;
+            if (path) {
+              $('photo').src = URL_ + '/storage/v1/object/public/track-photos/' + path.split('/').map(encodeURIComponent).join('/');
+              $('photo').alt = p.pet_name ? 'Photo of ' + p.pet_name : 'Photo of the pet';
+              $('photo').hidden = false;
+            }
+          }).catch(function () {});
+      }
+    }
+    show('pet');
+  }).catch(function () { show('missing'); });
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var note = $('note').value.trim();
+    if (!note) return;
+    $('send').disabled = true; $('error').hidden = true;
+    function send(lat, lng) {
+      rpc('track_tag_scan', { p_code: code, p_lat: lat, p_lng: lng, p_note: note }).then(function (ok) {
+        if (ok === true) { $('form').hidden = true; $('done').hidden = false; }
+        else throw new Error('no');
+      }).catch(function () {
+        $('send').disabled = false;
+        $('error').textContent = 'That didn’t send. Check your signal and try again.';
+        $('error').hidden = false;
+      });
+    }
+    if ($('share').checked && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function (pos) { send(pos.coords.latitude, pos.coords.longitude); },
+        function () { send(null, null); },
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+    } else { send(null, null); }
+  });
+})();
+</script>
+</body>
+</html>
