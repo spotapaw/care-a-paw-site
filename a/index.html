@@ -24,7 +24,10 @@
   .row{display:flex;gap:10px;align-items:flex-start}
   .row svg{flex:none;margin-top:3px}
   .label{font-size:12.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-  iframe{width:100%;height:220px;border:0;border-radius:14px}
+  .map{position:relative;width:100%;height:220px;border-radius:14px;overflow:hidden;background:#E8E4DA}
+  .map img{position:absolute;width:256px;height:256px;filter:saturate(.6) brightness(1.04)}
+  .map .ring{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:rgba(255,121,0,.18);border:3px solid #FF7900}
+  .map .attr{position:absolute;right:6px;bottom:4px;font-size:11px;color:#55625D;background:rgba(255,255,255,.8);padding:1px 6px;border-radius:6px}
   textarea{width:100%;min-height:100px;border:1px solid var(--line);border-radius:14px;padding:12px;font:inherit;background:#fff}
   label.check{display:flex;gap:10px;align-items:flex-start;font-size:15.5px}
   label.check input{width:22px;height:22px;margin-top:2px;accent-color:var(--forest)}
@@ -63,7 +66,7 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF7900" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16M4 10h16M4 15h10"/></svg>
         <div><div class="label">What to look for</div><div id="desc"></div></div>
       </div>
-      <iframe id="map" title="Area where the pet was last seen" loading="lazy" hidden></iframe>
+      <div id="map" class="map" role="img" aria-label="Map of the area where the pet was last seen" hidden><div class="ring"></div><span class="attr">© OpenStreetMap contributors</span></div>
       <p class="muted" style="margin:0">The area is approximate. Nobody's home address is shown.</p>
     </div>
 
@@ -121,10 +124,21 @@
         $('photo').hidden = false;
       }
       if (typeof a.area_lat === 'number' && typeof a.area_lng === 'number') {
-        var d = 0.012, lat = a.area_lat, lng = a.area_lng;
-        $('map').src = 'https://www.openstreetmap.org/export/embed.html?bbox=' +
-          (lng - d) + ',' + (lat - d * 0.7) + ',' + (lng + d) + ',' + (lat + d * 0.7) + '&layer=mapnik';
-        $('map').hidden = false;
+        var z = 15, n = Math.pow(2, z);
+        var fx = (a.area_lng + 180) / 360 * n;
+        var lr = a.area_lat * Math.PI / 180;
+        var fy = (1 - Math.log(Math.tan(lr) + 1 / Math.cos(lr)) / Math.PI) / 2 * n;
+        var box = $('map'); box.hidden = false;
+        var w = box.clientWidth || 360, h = 220;
+        var tx = Math.floor(fx), ty = Math.floor(fy);
+        for (var dx = -2; dx <= 2; dx++) for (var dy = -1; dy <= 1; dy++) {
+          var img = document.createElement('img');
+          img.alt = '';
+          img.src = 'https://tile.openstreetmap.org/' + z + '/' + (tx + dx) + '/' + (ty + dy) + '.png';
+          img.style.left = Math.round(w / 2 + (tx + dx - fx) * 256) + 'px';
+          img.style.top = Math.round(h / 2 + (ty + dy - fy) * 256) + 'px';
+          box.insertBefore(img, box.firstChild);
+        }
       }
       if (!lost) { $('form').querySelector('.label').textContent = 'Is this your pet, or do you know the family?'; }
       show('alert');
