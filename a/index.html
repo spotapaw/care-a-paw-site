@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lost or found pet · Track-a-Paw</title>
+<meta name="description" content="A lost or found pet near you. Seen them? Tell the family in one tap.">
+<meta property="og:title" content="Have you seen this pet? · Track-a-Paw">
+<meta property="og:description" content="A lost or found pet near you. Seen them? Tell the family in one tap.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--forest:#1F5148;--orange:#FF7900;--ivory:#F6F1E7;--cream:#FFFCF7;--ink:#23332F;--muted:#55625D;--line:#E6DFD1;--lost:#B3261E;--found:#2E7D32}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ivory);color:var(--ink);font:17px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;padding-inline:16px}
+  main{max-width:560px;margin:0 auto;padding-block:24px 48px;display:flex;flex-direction:column;gap:16px}
+  .brand{font:800 14px Figtree,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--forest)}
+  h1{font:700 32px/1.1 Fraunces,Georgia,serif;color:var(--forest);margin:0;text-wrap:balance}
+  .card{background:var(--cream);border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px}
+  .photo{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;background:#F3D9BF}
+  .badge{align-self:flex-start;color:#fff;border-radius:999px;padding:5px 12px;font-weight:800;font-size:13px;letter-spacing:.08em}
+  .b-lost{background:var(--lost)} .b-found{background:var(--found)}
+  .row{display:flex;gap:10px;align-items:flex-start}
+  .row svg{flex:none;margin-top:3px}
+  .label{font-size:12.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+  iframe{width:100%;height:220px;border:0;border-radius:14px}
+  textarea{width:100%;min-height:100px;border:1px solid var(--line);border-radius:14px;padding:12px;font:inherit;background:#fff}
+  label.check{display:flex;gap:10px;align-items:flex-start;font-size:15.5px}
+  label.check input{width:22px;height:22px;margin-top:2px;accent-color:var(--forest)}
+  button{font:800 17px Figtree,sans-serif;background:var(--orange);color:var(--forest);border:0;border-radius:14px;padding:15px 20px;cursor:pointer;width:100%}
+  button:disabled{opacity:.6}
+  button:focus-visible,textarea:focus-visible{outline:3px solid var(--forest);outline-offset:2px}
+  .muted{color:var(--muted);font-size:14.5px}
+  .ok{background:#E3F1E4;border:1px solid #BFE0C2;border-radius:14px;padding:14px;color:var(--found);font-weight:700}
+  .err{color:var(--lost);font-weight:700}
+  section{display:flex;flex-direction:column;gap:14px}
+  [hidden]{display:none!important}
+  footer{color:var(--muted);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">Track-a-Paw</div>
+
+  <section id="loading"><p class="muted">Loading…</p></section>
+
+  <section id="closed" hidden>
+    <h1>This alert is closed</h1>
+    <div class="card"><p>This pet is home, or the alert has ended. Thank you for looking.</p></div>
+  </section>
+
+  <section id="alert" hidden>
+    <span id="badge" class="badge b-lost">LOST</span>
+    <h1 id="title">Have you seen this pet?</h1>
+    <div class="card">
+      <img id="photo" class="photo" alt="" hidden>
+      <div class="row">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF7900" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <div><div class="label">Last seen</div><div id="where"></div></div>
+      </div>
+      <div id="descWrap" class="row" hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF7900" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16M4 10h16M4 15h10"/></svg>
+        <div><div class="label">What to look for</div><div id="desc"></div></div>
+      </div>
+      <iframe id="map" title="Area where the pet was last seen" loading="lazy" hidden></iframe>
+      <p class="muted" style="margin:0">The area is approximate. Nobody's home address is shown.</p>
+    </div>
+
+    <form id="form" class="card">
+      <div class="label">Seen this pet?</div>
+      <textarea id="note" maxlength="480" required
+        placeholder="Where and when you saw them, and how the family can reach you if you like."></textarea>
+      <label class="check"><input type="checkbox" id="share" checked>
+        <span>Share the area I'm in (rounded, never an exact spot).</span></label>
+      <button id="send" type="submit">Tell the family</button>
+      <p id="error" class="err" hidden></p>
+    </form>
+    <div id="done" class="ok" hidden>Thank you. The family has your sighting.</div>
+    <p class="muted" style="text-align:center;margin:0">Share this page: every pair of eyes helps.</p>
+  </section>
+
+  <footer>Track-a-Paw by Crafted Pixel · THE PET WELLBEING COMPANY PTY LTD</footer>
+</main>
+
+<script>
+(function () {
+  var URL_ = 'https://bxoboypzumjdfkpszbkt.supabase.co';
+  var KEY = 'sb_publishable_g3AquYaNa0cwXs8jxqidqg_p1FwQCWJ';
+  var H = { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' };
+  var id = (new URLSearchParams(location.search).get('id') || '').trim();
+  var $ = function (x) { return document.getElementById(x); };
+  var species = { dog: 'dog', cat: 'cat', rabbit: 'rabbit', bird: 'bird', other: 'pet' };
+  function show(s) { ['loading', 'closed', 'alert'].forEach(function (x) { $(x).hidden = x !== s; }); }
+  function ago(iso) {
+    var d = (Date.now() - new Date(iso).getTime()) / 60000;
+    if (d < 60) return Math.max(1, Math.round(d)) + ' min ago';
+    if (d < 1440) return Math.round(d / 60) + ' h ago';
+    return Math.round(d / 1440) + ' days ago';
+  }
+  if (!/^[0-9a-f-]{36}$/i.test(id)) { show('closed'); return; }
+
+  fetch(URL_ + '/rest/v1/track_alerts?select=id,kind,status,species,pet_name,description,photo_path,seen_at,area_label,area_lat,area_lng&id=eq.' + encodeURIComponent(id), { headers: H })
+    .then(function (r) { return r.ok ? r.json() : []; })
+    .then(function (rows) {
+      var a = rows && rows[0];
+      if (!a || a.status !== 'active') { show('closed'); return; }
+      var what = species[a.species] || 'pet';
+      var lost = a.kind === 'lost';
+      $('badge').textContent = lost ? 'LOST' : 'FOUND';
+      $('badge').className = 'badge ' + (lost ? 'b-lost' : 'b-found');
+      $('title').textContent = lost
+        ? (a.pet_name ? 'Have you seen ' + a.pet_name + '?' : 'Have you seen this ' + what + '?')
+        : 'Found: is this ' + what + ' yours?';
+      document.title = $('title').textContent + ' · Track-a-Paw';
+      $('where').textContent = (a.area_label ? a.area_label + ', ' : '') + ago(a.seen_at);
+      if (a.description) { $('desc').textContent = a.description; $('descWrap').hidden = false; }
+      if (a.photo_path) {
+        $('photo').src = URL_ + '/storage/v1/object/public/track-photos/' + a.photo_path.split('/').map(encodeURIComponent).join('/');
+        $('photo').alt = a.pet_name ? 'Photo of ' + a.pet_name : 'Photo of the ' + what;
+        $('photo').hidden = false;
+      }
+      if (typeof a.area_lat === 'number' && typeof a.area_lng === 'number') {
+        var d = 0.012, lat = a.area_lat, lng = a.area_lng;
+        $('map').src = 'https://www.openstreetmap.org/export/embed.html?bbox=' +
+          (lng - d) + ',' + (lat - d * 0.7) + ',' + (lng + d) + ',' + (lat + d * 0.7) + '&layer=mapnik';
+        $('map').hidden = false;
+      }
+      if (!lost) { $('form').querySelector('.label').textContent = 'Is this your pet, or do you know the family?'; }
+      show('alert');
+    }).catch(function () { show('closed'); });
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var note = $('note').value.trim();
+    if (note.length < 3) return;
+    $('send').disabled = true; $('error').hidden = true;
+    function send(lat, lng) {
+      fetch(URL_ + '/rest/v1/rpc/track_web_sighting', { method: 'POST', headers: H,
+        body: JSON.stringify({ p_alert: id, p_lat: lat, p_lng: lng, p_note: note }) })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (ok) {
+          if (ok === true) { $('form').hidden = true; $('done').hidden = false; }
+          else throw new Error('no');
+        }).catch(function () {
+          $('send').disabled = false;
+          $('error').textContent = 'That didn’t send. Check your signal and try again.';
+          $('error').hidden = false;
+        });
+    }
+    if ($('share').checked && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function (p) { send(p.coords.latitude, p.coords.longitude); },
+        function () { send(null, null); },
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+    } else { send(null, null); }
+  });
+})();
+</script>
+</body>
+</html>
