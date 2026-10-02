@@ -1,0 +1,203 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your a-Paw account</title><meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Figtree:wght@400;600;800&display=swap">
+<style>
+:root{--forest:#1F5148;--orange:#FF7900;--ivory:#F6F1E7;--ink:#23332F;--muted:#55625D;--card:#FFFFFF;--line:#E6DFD1}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ivory:#0F221E;--ink:#EDE7DA;--muted:#B9C4BE;--card:#18302B;--line:#35514A}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ivory);color:var(--ink);font:17px/1.6 'Figtree',system-ui,sans-serif}
+header{background:#1F5148;color:#F6F1E7;padding:20px 16px}
+header .in,main{max-width:760px;margin:0 auto}
+header a{color:#F6F1E7;text-decoration:none;font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:22px}
+main{padding:28px 16px 64px}
+h1,h2{font-family:'Fraunces',Georgia,serif;line-height:1.2}
+h1{font-size:34px;margin:0 0 12px}h2{font-size:22px;margin:28px 0 8px}
+a{color:#B85200}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin:16px 0}
+.btn{display:inline-block;background:#FF7900;color:#1F5148;font-weight:800;padding:14px 22px;border-radius:999px;text-decoration:none}
+.muted{color:var(--muted)}footer{max-width:760px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:14px}
+ul{padding-left:22px}
+label{display:block;font-weight:600;margin:0 0 14px}
+input{display:block;width:100%;margin-top:6px;padding:12px 14px;font:inherit;color:var(--ink);background:var(--ivory);border:1px solid var(--line);border-radius:12px}
+input:focus{outline:2px solid #FF7900;outline-offset:1px}
+button.btn{border:0;cursor:pointer;font:inherit;font-weight:800}
+button:disabled{opacity:.6;cursor:default}
+.btn-danger{background:#B3261E;color:#fff}
+.danger{border-color:#E8B4AE}
+.note{background:#E3EFE9;color:#1F5148;border-radius:14px;padding:12px 16px;margin:16px 0;font-weight:600}
+.note.bad{background:#FBE3DF;color:#8C1D18}
+</style></head><body>
+<header><div class="in"><a href="https://onetailonemeal.com/a-paw.html">a-Paw</a></div></header>
+<main><h1>Your a-Paw account</h1>
+<p class="muted">One account works in Care-a-Paw, Track-a-Paw, Snap-a-Paw, Feed-a-Paw, Adopt-a-Paw and Mind-a-Paw.</p>
+<div id="msg" class="note" role="status" hidden></div>
+
+<!-- Set a new password (arrives from the reset email) -->
+<section id="v-newpass" class="card" hidden>
+  <h2>Choose a new password</h2>
+  <form id="f-newpass">
+    <label>New password<input type="password" id="np1" autocomplete="new-password" minlength="8" required></label>
+    <label>Type it again<input type="password" id="np2" autocomplete="new-password" minlength="8" required></label>
+    <button class="btn" type="submit">Save my new password</button>
+  </form>
+</section>
+
+<!-- Signed out -->
+<section id="v-signin" class="card" hidden>
+  <h2>Sign in</h2>
+  <form id="f-signin">
+    <label>Email<input type="email" id="si-email" autocomplete="email" required></label>
+    <label>Password<input type="password" id="si-pass" autocomplete="current-password" required></label>
+    <button class="btn" type="submit">Sign in</button>
+  </form>
+  <p><a href="#" id="go-forgot">Forgot your password?</a></p>
+</section>
+
+<section id="v-forgot" class="card" hidden>
+  <h2>Reset your password</h2>
+  <p>We’ll email you a link. Open it on any device to choose a new password.</p>
+  <form id="f-forgot">
+    <label>Email<input type="email" id="fg-email" autocomplete="email" required></label>
+    <button class="btn" type="submit">Email me a link</button>
+  </form>
+  <p><a href="#" id="go-signin">Back to sign in</a></p>
+</section>
+
+<!-- Signed in -->
+<section id="v-account" hidden>
+  <div class="card">
+    <p class="muted" style="margin:0">Signed in as</p>
+    <p id="who" style="margin:.2rem 0 0;font-weight:800;word-break:break-all"></p>
+    <p style="margin:.8rem 0 0"><a href="#" id="signout">Sign out</a></p>
+  </div>
+  <div class="card">
+    <h2>Change your password</h2>
+    <form id="f-pass">
+      <label>New password<input type="password" id="cp1" autocomplete="new-password" minlength="8" required></label>
+      <label>Type it again<input type="password" id="cp2" autocomplete="new-password" minlength="8" required></label>
+      <button class="btn" type="submit">Save</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Change your email</h2>
+    <p>We’ll send a link to both your old and your new address. The change happens once you’ve tapped both.</p>
+    <form id="f-email">
+      <label>New email<input type="email" id="ce" autocomplete="email" required></label>
+      <button class="btn" type="submit">Send the links</button>
+    </form>
+  </div>
+  <div class="card danger">
+    <h2>Delete your account</h2>
+    <p>This deletes your a-Paw account in every app: your pets, records, reminders, alerts, messages, portraits and photos. It can’t be undone.
+      Subscriptions are billed by Apple or Google, so cancel them in your phone’s store settings too.</p>
+    <form id="f-delete">
+      <label>Type <b>DELETE</b> to confirm<input type="text" id="del" autocomplete="off" required></label>
+      <button class="btn btn-danger" type="submit">Delete my account</button>
+    </form>
+  </div>
+</section>
+
+<section id="v-gone" class="card" hidden>
+  <h2>Your account is deleted</h2>
+  <p>Thank you for being part of a-Paw. You can close this page.</p>
+</section>
+
+<p class="muted">Spot a Paw accounts are separate for now: delete yours inside the Spot a Paw app, or email us.
+  Need help? <a href="mailto:support@spot-a-paw.com">support@spot-a-paw.com</a></p>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function () {
+  var sb = supabase.createClient('https://bxoboypzumjdfkpszbkt.supabase.co', 'sb_publishable_g3AquYaNa0cwXs8jxqidqg_p1FwQCWJ',
+    { auth: { persistSession: false, autoRefreshToken: true, detectSessionInUrl: false } });
+  var HERE = location.origin + location.pathname;
+  var views = ['v-newpass', 'v-signin', 'v-forgot', 'v-account', 'v-gone'];
+  function $(id) { return document.getElementById(id); }
+  function show(v) { views.forEach(function (x) { $(x).hidden = x !== v; }); }
+  function say(text, bad) { var m = $('msg'); m.textContent = text; m.hidden = !text; m.className = 'note' + (bad ? ' bad' : ''); if (text) m.scrollIntoView({ block: 'nearest' }); }
+  function busy(form, on) { form.querySelectorAll('button,input').forEach(function (e) { e.disabled = on; }); }
+  function nice(e) {
+    var m = (e && e.message) || String(e);
+    if (/invalid login/i.test(m)) return 'That email and password don’t match. Try again, or reset your password.';
+    if (/not confirmed/i.test(m)) return 'Please confirm your email first: tap the link we sent when you signed up.';
+    if (/expired|invalid.*(otp|token)|otp/i.test(m)) return 'That link has expired or was already used. Ask for a new one below.';
+    if (/same.*password|different from the old/i.test(m)) return 'Please choose a password you haven’t used before.';
+    if (/rate|too many|security purposes/i.test(m)) return 'Too many tries. Please wait a minute and try again.';
+    return m;
+  }
+  function signedIn(user) { $('who').textContent = user.email; show('v-account'); }
+  function bind(id, fn) {
+    $(id).addEventListener('submit', async function (ev) {
+      ev.preventDefault(); var f = ev.target; busy(f, true); say('');
+      try { await fn(f); } catch (e) { say(nice(e), true); } finally { busy(f, false); }
+    });
+  }
+  function check(a, b) {
+    if (a.length < 8) throw new Error('Please use at least 8 characters.');
+    if (a !== b) throw new Error('The two passwords don’t match.');
+  }
+
+  bind('f-signin', async function () {
+    var r = await sb.auth.signInWithPassword({ email: $('si-email').value.trim(), password: $('si-pass').value });
+    if (r.error) throw r.error; $('si-pass').value = ''; signedIn(r.data.user);
+  });
+  bind('f-forgot', async function () {
+    var r = await sb.auth.resetPasswordForEmail($('fg-email').value.trim(), { redirectTo: HERE });
+    if (r.error) throw r.error; say('If that address has an a-Paw account, a link is on its way. Check your inbox and spam.');
+  });
+  bind('f-newpass', async function () {
+    check($('np1').value, $('np2').value);
+    var r = await sb.auth.updateUser({ password: $('np1').value });
+    if (r.error) throw r.error; $('np1').value = $('np2').value = '';
+    signedIn(r.data.user); say('Done. Your new password works in every a-Paw app.');
+  });
+  bind('f-pass', async function () {
+    check($('cp1').value, $('cp2').value);
+    var r = await sb.auth.updateUser({ password: $('cp1').value });
+    if (r.error) throw r.error; $('cp1').value = $('cp2').value = ''; say('Password changed.');
+  });
+  bind('f-email', async function () {
+    var r = await sb.auth.updateUser({ email: $('ce').value.trim() }, { emailRedirectTo: HERE });
+    if (r.error) throw r.error; say('Links sent. Tap the link in both inboxes to finish the change.');
+  });
+  bind('f-delete', async function () {
+    if ($('del').value.trim().toUpperCase() !== 'DELETE') throw new Error('Type DELETE to confirm.');
+    var r = await sb.rpc('delete_my_account');
+    if (r.error) throw r.error; await sb.auth.signOut().catch(function () {}); say(''); show('v-gone');
+  });
+  $('go-forgot').onclick = function (e) { e.preventDefault(); $('fg-email').value = $('si-email').value; say(''); show('v-forgot'); };
+  $('go-signin').onclick = function (e) { e.preventDefault(); say(''); show('v-signin'); };
+  $('signout').onclick = async function (e) { e.preventDefault(); await sb.auth.signOut().catch(function () {}); say('Signed out.'); show('v-signin'); };
+
+  // Arriving from an email link.
+  (async function () {
+    var q = new URLSearchParams(location.search), h = new URLSearchParams(location.hash.slice(1));
+    history.replaceState(null, '', HERE);
+    try {
+      if (q.get('token_hash')) {            // email template link: works on any device
+        var type = q.get('type') || 'recovery';
+        var r = await sb.auth.verifyOtp({ token_hash: q.get('token_hash'), type: type });
+        if (r.error) throw r.error;
+        if (type === 'recovery') { show('v-newpass'); return; }
+        if (type === 'email_change') { signedIn(r.data.user); say('Your email is updated.'); return; }
+        signedIn(r.data.user); return;
+      }
+      if (h.get('access_token')) {          // link sent from this page
+        var s = await sb.auth.setSession({ access_token: h.get('access_token'), refresh_token: h.get('refresh_token') });
+        if (s.error) throw s.error;
+        if (h.get('type') === 'recovery') { show('v-newpass'); return; }
+        signedIn(s.data.user); if (h.get('type') === 'email_change') say('Your email is updated.'); return;
+      }
+      if (h.get('error_description') || q.get('error_description')) throw new Error(h.get('error_description') || q.get('error_description'));
+      if (q.get('code')) throw new Error('This link was opened on a different device from the one that asked for it. Ask for a new one below.');
+      show(q.get('reset') !== null ? 'v-forgot' : 'v-signin');
+      if (q.get('email')) { $('si-email').value = $('fg-email').value = q.get('email'); }
+    } catch (e) { show('v-forgot'); say(nice(e), true); }
+  })();
+})();
+</script>
+</main>
+<footer>&copy; 2026 THE PET WELLBEING COMPANY PTY LTD (ABN 13 673 319 652) &middot; a-Paw is published as Crafted Pixel &middot;
+<a href="../privacy.html">Privacy</a> &middot; <a href="../terms.html">Terms</a> &middot;
+<a href="mailto:support@spot-a-paw.com">support@spot-a-paw.com</a></footer></body></html>
