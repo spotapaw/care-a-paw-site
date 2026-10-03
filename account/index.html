@@ -37,6 +37,7 @@ button:disabled{opacity:.6;cursor:default}
 <section id="v-newpass" class="card" hidden>
   <h2>Choose a new password</h2>
   <form id="f-newpass">
+    <input type="email" class="uname" autocomplete="username" readonly tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
     <label>New password<input type="password" id="np1" autocomplete="new-password" minlength="8" required></label>
     <label>Type it again<input type="password" id="np2" autocomplete="new-password" minlength="8" required></label>
     <button class="btn" type="submit">Save my new password</button>
@@ -74,7 +75,8 @@ button:disabled{opacity:.6;cursor:default}
   <div class="card">
     <h2>Change your password</h2>
     <form id="f-pass">
-      <label>New password<input type="password" id="cp1" autocomplete="new-password" minlength="8" required></label>
+      <input type="email" class="uname" autocomplete="username" readonly tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+    <label>New password<input type="password" id="cp1" autocomplete="new-password" minlength="8" required></label>
       <label>Type it again<input type="password" id="cp2" autocomplete="new-password" minlength="8" required></label>
       <button class="btn" type="submit">Save</button>
     </form>
@@ -126,7 +128,8 @@ button:disabled{opacity:.6;cursor:default}
     if (/rate|too many|security purposes/i.test(m)) return 'Too many tries. Please wait a minute and try again.';
     return m;
   }
-  function signedIn(user) { $('who').textContent = user.email; show('v-account'); }
+  function setUser(email) { document.querySelectorAll('.uname').forEach(function (e) { e.value = email || ''; }); }
+  function signedIn(user) { $('who').textContent = user.email; setUser(user.email); show('v-account'); }
   function bind(id, fn) {
     $(id).addEventListener('submit', async function (ev) {
       ev.preventDefault(); var f = ev.target; busy(f, true); say('');
@@ -179,14 +182,14 @@ button:disabled{opacity:.6;cursor:default}
         var type = q.get('type') || 'recovery';
         var r = await sb.auth.verifyOtp({ token_hash: q.get('token_hash'), type: type });
         if (r.error) throw r.error;
-        if (type === 'recovery') { show('v-newpass'); return; }
+        if (type === 'recovery') { setUser(r.data.user && r.data.user.email); show('v-newpass'); return; }
         if (type === 'email_change') { signedIn(r.data.user); say('Your email is updated.'); return; }
         signedIn(r.data.user); return;
       }
       if (h.get('access_token')) {          // link sent from this page
         var s = await sb.auth.setSession({ access_token: h.get('access_token'), refresh_token: h.get('refresh_token') });
         if (s.error) throw s.error;
-        if (h.get('type') === 'recovery') { show('v-newpass'); return; }
+        if (h.get('type') === 'recovery') { setUser(s.data.user && s.data.user.email); show('v-newpass'); return; }
         signedIn(s.data.user); if (h.get('type') === 'email_change') say('Your email is updated.'); return;
       }
       if (h.get('error_description') || q.get('error_description')) throw new Error(h.get('error_description') || q.get('error_description'));
